@@ -9,7 +9,7 @@ public class CentroMedico {
     private final int x;
     private final int y;
     private final List<EquipoMedico> equipos;
-    private int emergenciasAtendidas;
+    private int emergenciasAtendidas; // En tu lógica original, cuenta los equipos ocupados
 
     public CentroMedico(int x, int y) {
         this.id = ++contador;
@@ -19,7 +19,7 @@ public class CentroMedico {
         this.emergenciasAtendidas = 0;
 
         // Inicializar equipos médicos
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) { // Tienes 5 equipos médicos
             equipos.add(new EquipoMedico());
         }
     }
@@ -36,49 +36,86 @@ public class CentroMedico {
         return y;
     }
 
+    // Este método, según tu lógica original, verifica si hay menos de 6 equipos ocupados.
+    // Como solo hay 5 equipos, significa que está "disponible para intentar atender" si no todos los equipos están al límite (imposible de superar 5).
     public synchronized boolean puedeAtender() {
-        return emergenciasAtendidas < 6; // Límite de 6 emergencias
+        return emergenciasAtendidas < 6; // Límite de 6 emergencias (efectivamente 5 por el número de equipos)
     }
 
+    // Asigna un equipo e incrementa el contador de equipos ocupados
     public synchronized EquipoMedico asignarEquipo() {
         for (EquipoMedico equipo : equipos) {
             if (equipo.estaDisponible()) {
                 equipo.asignar();
-                emergenciasAtendidas++; // Incrementar el contador de emergencias atendidas
+                emergenciasAtendidas++; // Contador de equipos ocupados se incrementa
                 return equipo;
             }
         }
         return null; // No hay equipos disponibles
     }
 
+    // Libera un equipo y decrementa el contador de equipos ocupados
     public synchronized void liberarEquipo(EquipoMedico equipo) {
         equipo.liberar();
-        emergenciasAtendidas--; // Decrementar el contador al liberar el equipo
+        if (emergenciasAtendidas > 0) { // Asegurarse de no decrementar por debajo de 0
+             emergenciasAtendidas--; // Contador de equipos ocupados se decrementa
+        }
     }
 
+    // MODIFICADO para permitir atención concurrente
     public synchronized void notificarLlegada(Recurso recurso, Emergencia emergencia) {
-        // Aquí puedes manejar la lógica de lo que sucede cuando un recurso llega
-        System.out.printf("🚑 Recurso #%d ha llegado al centro médico #%d con la emergencia #%d\n",
+        System.out.printf("🚑 Ambulancia Recurso #%d ha llegado al centro médico #%d con la emergencia #%d\n",
                 recurso.getId(), this.id, emergencia.getId());
 
-        // Asignar equipo médico
-        EquipoMedico equipoAsignado = asignarEquipo();
+        // Se intenta asignar un equipo. Si tiene éxito, emergenciasAtendidas (equipos ocupados) se incrementa dentro de asignarEquipo().
+        EquipoMedico equipoAsignado = asignarEquipo(); 
+
         if (equipoAsignado != null) {
-            int tiempoAtencion = obtenerTiempoPorGravedad(emergencia.getGravedad());
-            System.out.printf("🩺 Equipo médico #%d asignado para atender emergencia #%d\n", equipoAsignado.getId(), emergencia.getId());
-            // Simular tiempo de atención
-            try {
-                Thread.sleep(tiempoAtencion); // Simular tiempo de atención
-            } catch (InterruptedException e) {
-                System.out.println("❌ Error durante la atención de la emergencia: " + e.getMessage());
-            }
-            liberarEquipo(equipoAsignado);
+            System.out.printf("🩺 Equipo médico #%d asignado para atender emergencia #%d en centro #%d. (Equipos ocupados ahora: %d)\n",
+                    equipoAsignado.getId(), emergencia.getId(), this.id, this.emergenciasAtendidas);
+
+            // La ambulancia (Recurso) se libera INMEDIATAMENTE después de entregar al paciente.
             recurso.liberar();
-            System.out.printf("🔄 Recurso #%d liberado tras atender emergencia #%d y equipo médico #%d liberado\n",
-                    recurso.getId(), emergencia.getId(), equipoAsignado.getId());
+            System.out.printf("🔄 Ambulancia Recurso #%d liberada (tras entregar paciente en centro #%d).\n", recurso.getId(), this.id);
+
+            // Crear un NUEVO HILO para manejar la atención.
+            // Esto permite que notificarLlegada() termine rápido y el CentroMedico
+            // pueda procesar la llegada de otras emergencias en paralelo.
+            final EquipoMedico finalEquipoAsignado = equipoAsignado;
+            final Emergencia finalEmergencia = emergencia;
+            // 'this' (la instancia de CentroMedico) es implícitamente final para la lambda.
+
+            new Thread(() -> {
+                try {
+                    int tiempoAtencion = obtenerTiempoPorGravedad(finalEmergencia.getGravedad());
+                    System.out.printf("⏳ Equipo #%d inicia atención de emergencia #%d en centro #%d por %d ms.\n",
+                                      finalEquipoAsignado.getId(), finalEmergencia.getId(), this.id, tiempoAtencion);
+                    Thread.sleep(tiempoAtencion); // Simulación del tiempo de atención en este hilo separado
+                    System.out.printf("✅ Atención completada para emergencia #%d por equipo #%d en centro #%d.\n",
+                                      finalEmergencia.getId(), finalEquipoAsignado.getId(), this.id);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Reestablecer el estado de interrupción
+                    System.out.printf("❌ Error durante la atención de emergencia #%d por equipo #%d en centro #%d: %s\n",
+                                      finalEmergencia.getId(), finalEquipoAsignado.getId(), this.id, e.getMessage());
+                } finally {
+                    // Este bloque se ejecuta siempre (éxito o error en la atención).
+                    // Liberar el equipo médico. Esto también decrementará 'emergenciasAtendidas'.
+                    liberarEquipo(finalEquipoAsignado); // Llama al método sincronizado para liberar el equipo
+                    System.out.printf("🔄 Equipo médico #%d liberado en centro #%d. (Equipos ocupados ahora: %d)\n",
+                                      finalEquipoAsignado.getId(), this.id, this.emergenciasAtendidas);
+                }
+            }).start(); // Iniciar el hilo de atención
+
         } else {
-            System.out.printf("⏳ No hay equipos médicos disponibles en el centro médico #%d para emergencia #%d\n", this.id, emergencia.getId());
-            recurso.liberar(); // Liberar la ambulancia si no hay equipo médico
+            // No hay equipos médicos disponibles en este momento.
+            // emergenciasAtendidas no fue incrementado por asignarEquipo() porque devolvió null.
+            System.out.printf("⏳ No hay equipos médicos disponibles en el centro médico #%d para emergencia #%d. (Equipos ocupados: %d)\n",
+                              this.id, emergencia.getId(), this.emergenciasAtendidas);
+            
+            // Si el centro no puede asignar un equipo, la ambulancia (Recurso) debe ser liberada
+            // para que no quede bloqueada con el paciente.
+            recurso.liberar();
+            System.out.printf("🔄 Ambulancia Recurso #%d liberada (centro #%d no pudo asignar equipo médico).\n", recurso.getId(), this.id);
         }
     }
 
@@ -90,7 +127,8 @@ public class CentroMedico {
 
     @Override
     public String toString() {
-        return String.format("Centro Médico #%d en (%d,%d) - Emergencias atendidas: %d", id, x, y, emergenciasAtendidas);
+        // Muestra los equipos ocupados (emergenciasAtendidas)
+        return String.format("Centro Médico #%d en (%d,%d) - Equipos ocupados: %d/5", id, x, y, emergenciasAtendidas);
     }
 
     private int obtenerTiempoPorGravedad(Emergencia.Gravedad gravedad) {

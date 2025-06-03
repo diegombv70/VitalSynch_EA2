@@ -18,7 +18,7 @@ public class Operador implements Runnable {
                 Emergencia emergencia = new Emergencia(gravedad, x, y);
                 sistema.registrarEmergencia(emergencia);
 
-                Thread.sleep(2000); // simula tiempo entre llamadas
+                Thread.sleep(3000); // simula tiempo entre llamadas
             }
         } catch (InterruptedException e) {
             System.out.println("🛑 Operador detenido.");

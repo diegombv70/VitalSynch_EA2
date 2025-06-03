@@ -1,5 +1,5 @@
-
 package emergencias;
+
 public class Recurso {
     private static int contador = 0;
     private final int id;
@@ -49,13 +49,16 @@ public class Recurso {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    // Implementing the distance calculation to CentroMedico
+    public double distanciaA(CentroMedico centro) {
+        int dx = centro.getX() - this.x;
+        int dy = centro.getY() - this.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
     @Override
     public String toString() {
         return String.format("Recurso #%d [%s] en (%d,%d)", id,
                 estaDisponible() ? "Disponible" : "Ocupado", x, y);
-    }
-
-    double distanciaA(CentroMedico centroCercano) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

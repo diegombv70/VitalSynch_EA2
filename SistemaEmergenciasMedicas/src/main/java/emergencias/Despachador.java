@@ -44,7 +44,7 @@ public class Despachador implements Runnable {
                         if (centroCercano != null) {
                             // Calcular tiempo de viaje al centro médico
                             double distanciaCentro = mejor.distanciaA(centroCercano);
-                            int tiempoViaje = (int) (distanciaCentro / 10 * 60); // Suponiendo 10 unidades de distancia por minuto
+                            int tiempoViaje = (int) (distanciaCentro * 100); 
 
                             // Usar variables finales para la lambda
                             final Recurso finalRecurso = mejor; // Hacer la variable final
@@ -52,9 +52,10 @@ public class Despachador implements Runnable {
 
                             new Thread(() -> {
                                 try {
-                                    Thread.sleep(tiempoViaje * 1000); // Convertir a milisegundos
+                                    //Thread.sleep(tiempoViaje * 1000); // Convertir a milisegundos
+                                    Thread.sleep(tiempoViaje); 
                                     finalRecurso.moverA(centroCercano.getX(), centroCercano.getY());
-                                    System.out.printf("🚑 Recurso #%d llegó al centro médico #%d\n", finalRecurso.getId(), centroCercano.getId());
+                                    System.out.printf("🚑 Recurso #%d llegó al centro médico #%d tiempo Viaje %d\n", finalRecurso.getId(), centroCercano.getId(), tiempoViaje/1000);
 
                                     // Aquí solo se notifica al centro médico que ha llegado
                                     centroCercano.notificarLlegada(finalRecurso, finalEmergencia);
