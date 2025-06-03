@@ -134,9 +134,9 @@ public class CentroMedico {
     private int obtenerTiempoPorGravedad(Emergencia.Gravedad gravedad) {
         switch (gravedad) {
             case CRITICO:
-                return 15000; // 15 segundos
+                return 50000; // 50 segundos
             case GRAVE:
-                return 12000; // 12 segundos
+                return 20000; // 20 segundos
             case MODERADO:
                 return 10000; // 10 segundos
             case LEVE:

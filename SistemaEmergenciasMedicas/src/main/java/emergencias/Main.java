@@ -13,10 +13,7 @@ public class Main {
         sistema.registrarRecurso(new Recurso(50, 30));
         sistema.registrarRecurso(new Recurso(60, 20));
         sistema.registrarRecurso(new Recurso(70, 10));
-        sistema.registrarRecurso(new Recurso(70, 10));
-        sistema.registrarRecurso(new Recurso(70, 10));
-        sistema.registrarRecurso(new Recurso(70, 10));
-        sistema.registrarRecurso(new Recurso(70, 10));
+
 
         // Registrar centros médicos
         sistema.registrarCentroMedico(new CentroMedico(10, 10));
