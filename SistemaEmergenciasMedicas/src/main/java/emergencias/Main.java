@@ -1,19 +1,31 @@
 package emergencias;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
 public class Main {
     public static void main(String[] args) {
-        BlockingQueue<Emergencia> colaEmergencias = new ArrayBlockingQueue<>(10);
-        Recurso recurso = new Recurso("Ambulancia");
+        SistemaMonitoreo sistema = new SistemaMonitoreo();
 
-        Thread operadorThread = new Thread(new Operador(colaEmergencias));
-        Thread despachadorThread = new Thread(new Despachador(colaEmergencias, recurso));
-        Thread monitoreoThread = new Thread(new SistemaMonitoreo(colaEmergencias));
+        // Registrar recursos (ambulancias)
+        sistema.registrarRecurso(new Recurso(10, 10));
+        sistema.registrarRecurso(new Recurso(50, 50));
+        sistema.registrarRecurso(new Recurso(20, 80));
+        sistema.registrarRecurso(new Recurso(30, 60));
+        sistema.registrarRecurso(new Recurso(40, 60));
 
-        operadorThread.start();
-        despachadorThread.start();
-        monitoreoThread.start();
+        // Lanzar hilos
+        Thread operador = new Thread(new Operador(sistema));
+        Thread despachador = new Thread(new Despachador(sistema));
+
+        operador.start();
+        despachador.start();
+
+        // Monitoreo periódico
+        while (true) {
+            try {
+                sistema.mostrarEstado();
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
     }
 }

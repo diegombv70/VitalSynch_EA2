@@ -1,27 +1,27 @@
 package emergencias;
 
-import java.util.concurrent.BlockingQueue;
-
 public class Operador implements Runnable {
-    private BlockingQueue<Emergencia> colaEmergencias;
+    private final SistemaMonitoreo sistema;
 
-    public Operador(BlockingQueue<Emergencia> colaEmergencias) {
-        this.colaEmergencias = colaEmergencias;
+    public Operador(SistemaMonitoreo sistema) {
+        this.sistema = sistema;
     }
 
     @Override
     public void run() {
-        // Simulación de recepción de llamadas
-        while (true) {
-            // Aquí se simularía la recepción de una nueva emergencia
-            Emergencia emergencia = new Emergencia("E1", "Crítico", 0, "Ubicación A");
-            try {
-                colaEmergencias.put(emergencia);
-                System.out.println("Emergencia recibida: " + emergencia.getId());
-                Thread.sleep(1000); // Simular tiempo entre llamadas
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        try {
+            while (true) {
+                Emergencia.Gravedad gravedad = Emergencia.Gravedad.values()[(int) (Math.random() * 4)];
+                int x = (int) (Math.random() * 100);
+                int y = (int) (Math.random() * 100);
+
+                Emergencia emergencia = new Emergencia(gravedad, x, y);
+                sistema.registrarEmergencia(emergencia);
+
+                Thread.sleep(3000); // simula tiempo entre llamadas
             }
+        } catch (InterruptedException e) {
+            System.out.println("🛑 Operador detenido.");
         }
     }
 }

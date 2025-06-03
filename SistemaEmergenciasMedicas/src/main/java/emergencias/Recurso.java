@@ -1,27 +1,57 @@
-package emergencias;
 
+package emergencias;
 public class Recurso {
-    private String tipo; // Ambulancia, Médico, Equipamiento
+    private static int contador = 0;
+    private final int id;
+    private int x;
+    private int y;
     private boolean disponible;
 
-    public Recurso(String tipo) {
-        this.tipo = tipo;
+    public Recurso(int x, int y) {
+        this.id = ++contador;
+        this.x = x;
+        this.y = y;
         this.disponible = true;
     }
 
-    public String getTipo() {
-        return tipo;
+    public int getId() {
+        return id;
     }
 
-    public boolean isDisponible() {
+    public synchronized boolean estaDisponible() {
         return disponible;
     }
 
-    public void ocupar() {
-        this.disponible = false;
+    public synchronized void asignar() {
+        disponible = false;
     }
 
-    public void liberar() {
-        this.disponible = true;
+    public synchronized void liberar() {
+        disponible = true;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void moverA(int nuevoX, int nuevoY) {
+        this.x = nuevoX;
+        this.y = nuevoY;
+    }
+
+    public double distanciaA(Emergencia e) {
+        int dx = e.getX() - this.x;
+        int dy = e.getY() - this.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Recurso #%d [%s] en (%d,%d)", id,
+                estaDisponible() ? "Disponible" : "Ocupado", x, y);
     }
 }
