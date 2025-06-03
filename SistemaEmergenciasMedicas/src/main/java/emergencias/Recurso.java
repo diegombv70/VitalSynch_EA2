@@ -54,4 +54,8 @@ public class Recurso {
         return String.format("Recurso #%d [%s] en (%d,%d)", id,
                 estaDisponible() ? "Disponible" : "Ocupado", x, y);
     }
+
+    double distanciaA(CentroMedico centroCercano) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
