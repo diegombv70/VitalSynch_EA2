@@ -49,7 +49,7 @@ public class Recurso {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    // Implementing the distance calculation to CentroMedico
+    
     public double distanciaA(CentroMedico centro) {
         int dx = centro.getX() - this.x;
         int dy = centro.getY() - this.y;

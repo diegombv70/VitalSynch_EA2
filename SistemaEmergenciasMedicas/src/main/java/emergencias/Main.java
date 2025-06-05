@@ -24,7 +24,7 @@ public class Main {
         Thread operador = new Thread(new Operador(sistema));
         operador.start();
         
-        int numeroDeDespachadores = 12; // Puedes ajustar este número según necesites (ej. igual al número de ambulancias o menos)
+        int numeroDeDespachadores = 12; 
                 System.out.println("🚀 Iniciando " + numeroDeDespachadores + " hilos Despachadores...");
                 for (int i = 0; i < numeroDeDespachadores; i++) {
                     Thread despachadorThread = new Thread(new Despachador(sistema), "Despachador-" + (i + 1));

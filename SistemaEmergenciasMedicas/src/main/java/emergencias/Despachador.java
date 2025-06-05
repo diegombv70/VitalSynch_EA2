@@ -47,37 +47,37 @@ public class Despachador implements Runnable {
                             int tiempoViaje = (int) (distanciaCentro * 100); 
 
                             // Usar variables finales para la lambda
-                            final Recurso finalRecurso = mejor; // Hacer la variable final
-                            final Emergencia finalEmergencia = emergencia; // Hacer la variable final
+                            final Recurso finalRecurso = mejor; 
+                            final Emergencia finalEmergencia = emergencia; 
 
                             new Thread(() -> {
                                 try {
-                                    //Thread.sleep(tiempoViaje * 1000); // Convertir a milisegundos
+                                    
                                     Thread.sleep(tiempoViaje); 
                                     finalRecurso.moverA(centroCercano.getX(), centroCercano.getY());
-                                    System.out.printf("🚑 Recurso #%d llegó al centro médico #%d tiempo Viaje %d\n", finalRecurso.getId(), centroCercano.getId(), tiempoViaje/1000);
+                                    System.out.printf(" Recurso #%d llegó al centro médico #%d tiempo Viaje %d\n", finalRecurso.getId(), centroCercano.getId(), tiempoViaje/1000);
 
-                                    // Aquí solo se notifica al centro médico que ha llegado
+                                    
                                     centroCercano.notificarLlegada(finalRecurso, finalEmergencia);
                                     
                                 } catch (InterruptedException ex) {
-                                    System.out.println("❌ Error al mover recurso: " + ex.getMessage());
+                                    System.out.println(" Error al mover recurso: " + ex.getMessage());
                                 }
                             }).start();
                         } else {
-                            System.out.printf("⏳ No hay centros médicos disponibles para atender la emergencia #%d\n", emergencia.getId());
+                            System.out.printf(" No hay centros médicos disponibles para atender la emergencia #%d\n", emergencia.getId());
                             mejor.liberar(); // Liberar la ambulancia si no hay centro médico
                         }
                     } else {
                         System.out.printf("⏳ No hay recursos disponibles para emergencia #%d\n", emergencia.getId());
-                        sistema.registrarEmergencia(emergencia); // la volvemos a poner en cola
+                        sistema.registrarEmergencia(emergencia); 
                     }
                 }
 
-                Thread.sleep(2000); // espera entre asignaciones
+                Thread.sleep(2000); 
             }
         } catch (InterruptedException e) {
-            System.out.println("🛑 Despachador detenido.");
+            System.out.println(" Despachador detenido.");
         }
     }
 }

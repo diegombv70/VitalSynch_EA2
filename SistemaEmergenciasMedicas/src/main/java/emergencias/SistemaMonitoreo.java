@@ -10,17 +10,17 @@ public class SistemaMonitoreo {
 
     public void registrarEmergencia(Emergencia e) {
         emergencias.offer(e);
-        System.out.println("🚨 Emergencia registrada: " + e);
+        System.out.println("Emergencia registrada: " + e);
     }
 
     public void registrarRecurso(Recurso r) {
         recursos.add(r);
-        System.out.println("🚑 Recurso disponible: " + r);
+        System.out.println("Recurso disponible: " + r);
     }
 
     public void registrarCentroMedico(CentroMedico centro) {
         centrosMedicos.add(centro);
-        System.out.println("🏥 Centro Médico registrado: " + centro);
+        System.out.println("Centro Médico registrado: " + centro);
     }
 
     public List<Recurso> getRecursos() {
